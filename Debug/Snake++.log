@@ -1,8 +1,0 @@
-﻿  [compiling] src\main.cpp
-  [linking] bin\SNAKEPP.bin
-  C:\CEdev\meta\ld.alm [1463] macro ? [1206] :read? [7] obj\\main.cpp.src [10100]:
-  	extern __llshru
-  extern? [12] (CALM)
-EXEC : error : symbol ':globals.__llshru' is undefined or out of scope.
-  make: *** [bin/SNAKEPP.bin] Error 2
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.MakeFile.Targets(46,5): error MSB3073: The command "make debug" exited with code 2.
