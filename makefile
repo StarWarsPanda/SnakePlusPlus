@@ -6,7 +6,7 @@
 NAME ?= SNAKEPP
 
 #For ICE shell
-ICON ?= icon.png
+#ICON ?= icon.png
 DESCRIPTION ?= "Snake++"
 
 #Memory allocation on calc
