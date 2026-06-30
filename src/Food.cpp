@@ -17,8 +17,13 @@ bool Food::IsGolden() const
     return m_golden;
 }
 
-void Food::Eat(const Snake* snake)
+void Food::Eat(Snake* snake)
 {
+    if (m_golden)
+    {
+        snake->golden++;
+    }
+
     do
     {
         m_position = Vector2D<int24_t>(
@@ -27,7 +32,7 @@ void Food::Eat(const Snake* snake)
         );
     } while (snake != nullptr && snake->CheckCollision(&m_position));
 
-    m_golden = randInt(0, 100) == 50;
+    m_golden = randInt(0, 100) <= 15;
 }
 
 void Food::Update()

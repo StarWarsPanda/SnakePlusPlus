@@ -14,10 +14,15 @@
 #define uint24_t uint32_t
 #endif
 
+#define IncrementWrap(x, min, max) do { if ((x + 1) > (max)) (x) = (min); else ++(x); } while (0)
+#define DecrementWrap(x, min, max) do { if ((x - 1) < (min)) (x) = (max); else --(x); } while (0)
+
 #define gfx_ResetClipRegion() gfx_SetClipRegion(0, 0, GFX_LCD_WIDTH, GFX_LCD_HEIGHT)
 
 #define gfx_SetPaletteColor(color) const uint8_t gfx_BeforeColor = gfx_SetColor(color)
 #define gfx_ResetColor() gfx_SetColor(gfx_BeforeColor)
+
+#define gfx_1555ToRGB(c, out_r, out_g, out_b) do { (out_r) = (uint8_t)((((c) >> 10) & 0x1F) << 3); (out_g) = (uint8_t)((((c) >>  5) & 0x1F) << 3); (out_b) = (uint8_t)(((c) & 0x1F) << 3); } while (0)
 
 typedef enum 
 {
@@ -44,6 +49,31 @@ static inline const char* DirectionAsString(Direction direction)
     }
 }
 
+static inline uint8_t gfx_GetFontHeight()
+{
+    const uint8_t height = gfx_SetFontHeight(0); gfx_SetFontHeight(height);
+    return height;
+}
+
+static inline void gfx_PrintStringXYCharWrap(const char* string, int x, int y, uint24_t max_width, uint8_t padding)
+{
+    gfx_SetTextXY(x, y);
+
+    const uint8_t charHeight = gfx_GetFontHeight();
+
+    for (size_t i = 0; string[i] != '\0'; i++)
+    {
+        const uint24_t charWidth = gfx_GetCharWidth(string[i]);
+
+        if (gfx_GetTextX() + charWidth > max_width)
+        {
+            gfx_SetTextXY(x, gfx_GetTextY() + charHeight + padding);
+        }
+
+        gfx_PrintChar(string[i]);
+    }
+}
+
 static inline void gfx_Arrow(Direction direction, Vector2D<int24_t> position, uint8_t length, uint8_t color)
 {
     const Vector2D<int24_t> centered = position + Vector2D<int24_t>(BLOCK_SIZE / 2, BLOCK_SIZE / 2);
@@ -63,6 +93,9 @@ static inline void gfx_Arrow(Direction direction, Vector2D<int24_t> position, ui
             break;
         case Left:
             gfx_Line(centered.x, centered.y, centered.x - (BLOCK_SIZE + length), centered.y);
+            break;
+        case Size:
+        default:
             break;
     }
 

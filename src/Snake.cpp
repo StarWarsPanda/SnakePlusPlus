@@ -5,25 +5,63 @@ Snake::SnakeSegment::SnakeSegment() {}
 
 Snake::SnakeSegment Snake::m_segments[MAX_SNAKE_SEGMENTS];
 
-Snake::Snake(Vector2D<int24_t> startPosition, Direction startDirection, uint8_t defaultSize)
-    : m_head(startPosition, startDirection), m_tail(startPosition, startDirection),
-    m_previousTail(startPosition, startDirection), m_snakeSize(defaultSize), m_defaultSnakeSize(defaultSize)
+Snake::Snake(Vector2D<int24_t> startPosition, Direction startDirection, uint8_t defaultSize, const uint24_t& frame)
+    : m_head(startPosition, startDirection), m_tail(startPosition, startDirection), m_previousTail(startPosition, startDirection), m_snakeSize(defaultSize), m_defaultSnakeSize(defaultSize), m_frame(frame), m_resetStartPosition(startPosition), m_resetStartDirection(startDirection)
 {
     switch (startDirection)
     {
-    case Up:
-    case Down:
-        m_tail.position.y += -(static_cast<int24_t>(m_tail.direction) - 1) * BLOCK_SIZE * defaultSize;
-        break;
+        case Up:
+        case Down:
+            m_tail.position.y += -(static_cast<int24_t>(m_tail.direction) - 1) * BLOCK_SIZE * defaultSize;
+            m_previousTail.position.y += -(static_cast<int24_t>(m_tail.direction) - 1) * BLOCK_SIZE * (defaultSize + 1);
+            break;
 
-    case Left:
-    case Right:
-        m_tail.position.x += -(static_cast<int24_t>(m_tail.direction) - 2) * BLOCK_SIZE * defaultSize;
-        break;
+        case Left:
+        case Right:
+            m_tail.position.x += -(static_cast<int24_t>(m_tail.direction) - 2) * BLOCK_SIZE * defaultSize;
+            m_previousTail.position.x += -(static_cast<int24_t>(m_tail.direction) - 2) * BLOCK_SIZE * (defaultSize + 1);
+            break;
+        case Size:
+        default:
+            break;
     }
 }
 
 Snake::~Snake() {}
+
+void Snake::Reset()
+{
+    m_head.position = m_resetStartPosition;
+    m_head.direction = m_resetStartDirection;
+    m_tail.position = m_resetStartPosition;
+    m_tail.direction = m_resetStartDirection;
+    m_previousTail.position = m_resetStartPosition;
+    m_previousTail.direction = m_resetStartDirection;
+    m_snakeSize = m_defaultSnakeSize;
+
+    for (size_t i = 0; i < m_segmentLength; i++)
+    {
+        m_segments[i] = SnakeSegment();
+    }
+
+    m_segmentLength = 0;
+
+    switch (m_resetStartDirection)
+    {
+        case Up:
+        case Down:
+            m_tail.position.y += -(static_cast<int24_t>(m_tail.direction) - 1) * BLOCK_SIZE * m_defaultSnakeSize;
+            break;
+
+        case Left:
+        case Right:
+            m_tail.position.x += -(static_cast<int24_t>(m_tail.direction) - 2) * BLOCK_SIZE * m_defaultSnakeSize;
+            break;
+        case Size:
+        default:
+            break;
+    }
+}
 
 void Snake::ChangeDirection(Direction newDirection)
 {
@@ -56,28 +94,34 @@ void Snake::Update()
 
     switch (m_head.direction)
     {
-    case Up:
-    case Down:
-        m_head.position.y += (static_cast<int24_t>(m_head.direction) - 1) * BLOCK_SIZE;
-        break;
-    case Left:
-    case Right:
-        m_head.position.x += (static_cast<int24_t>(m_head.direction) - 2) * BLOCK_SIZE;
-        break;
+        case Up:
+        case Down:
+            m_head.position.y += (static_cast<int24_t>(m_head.direction) - 1) * BLOCK_SIZE;
+            break;
+        case Left:
+        case Right:
+            m_head.position.x += (static_cast<int24_t>(m_head.direction) - 2) * BLOCK_SIZE;
+            break;
+        case Size:
+        default:
+            break;
     }
 
     if (!m_isAddingLength)
     {
         switch (m_tail.direction)
         {
-        case Up:
-        case Down:
-            m_tail.position.y += (static_cast<int24_t>(m_tail.direction) - 1) * BLOCK_SIZE;
-            break;
-        case Left:
-        case Right:
-            m_tail.position.x += (static_cast<int24_t>(m_tail.direction) - 2) * BLOCK_SIZE;
-            break;
+            case Up:
+            case Down:
+                m_tail.position.y += (static_cast<int24_t>(m_tail.direction) - 1) * BLOCK_SIZE;
+                break;
+            case Left:
+            case Right:
+                m_tail.position.x += (static_cast<int24_t>(m_tail.direction) - 2) * BLOCK_SIZE;
+                break;
+            case Size:
+            default:
+                break;
         }
     }
 
@@ -96,10 +140,11 @@ void Snake::Draw(gfx_sprite_t* snakeTiles, const Vector2D<int24_t>& foodPosition
         gfx_sprite_t* (*transform)(const gfx_sprite_t * __restrict, gfx_sprite_t * __restrict);
         switch (m_head.direction)
         {
-        case Up:    transform = nullptr;               break;
-        case Down:  transform = gfx_RotateSpriteHalf;  break;
-        case Left:  transform = gfx_RotateSpriteCC;    break;
-        case Right: transform = gfx_RotateSpriteC;     break;
+            case Up:    transform = nullptr;               break;
+            case Down:  transform = gfx_RotateSpriteHalf;  break;
+            case Left:  transform = gfx_RotateSpriteCC;    break;
+            case Right: transform = gfx_RotateSpriteC;     break;
+            case Size:  default:                           return;
         }
 
         const Vector2D<int24_t> delta = foodPosition - m_head.position;
@@ -108,6 +153,7 @@ void Snake::Draw(gfx_sprite_t* snakeTiles, const Vector2D<int24_t>& foodPosition
         DrawTile(snakeTiles, m_head.position, Vector2D<uint8_t>(0, isCloseToFood ? 1 : 0), transform);
     }
 
+    if(isPartial)
     {
         uint8_t previousColor = gfx_SetColor(0);
         gfx_FillRectangle_NoClip(m_previousTail.position.x, m_previousTail.position.y, BLOCK_SIZE, BLOCK_SIZE);
@@ -163,6 +209,10 @@ void Snake::Draw(gfx_sprite_t* snakeTiles, const Vector2D<int24_t>& foodPosition
             transform = gfx_RotateSpriteHalf;
         }
 
+        uint8_t previousColor = gfx_SetColor(0);
+        gfx_FillRectangle_NoClip(segment.position.x, segment.position.y, BLOCK_SIZE, BLOCK_SIZE);
+        gfx_SetColor(previousColor);
+
         DrawTile(snakeTiles, segment.position, Vector2D<uint8_t>(2, 0), transform);
     }
     else
@@ -203,10 +253,10 @@ void Snake::Draw(gfx_sprite_t* snakeTiles, const Vector2D<int24_t>& foodPosition
 
         switch (m_tail.direction)
         {
-        case Right: transformA = gfx_RotateSpriteC;    break;
-        case Left:  transformA = gfx_RotateSpriteCC;   break;
-        case Down:  transformA = gfx_RotateSpriteHalf; break;
-        default:    break;
+            case Right: transformA = gfx_RotateSpriteC;    break;
+            case Left:  transformA = gfx_RotateSpriteCC;   break;
+            case Down:  transformA = gfx_RotateSpriteHalf; break;
+            default:    break;
         }
 
         if (m_previousTail.direction != m_tail.direction)
@@ -224,6 +274,13 @@ void Snake::Draw(gfx_sprite_t* snakeTiles, const Vector2D<int24_t>& foodPosition
             {
                 transformB = gfx_FlipSpriteX;
             }
+        }
+
+        if (isPartial)
+        {
+            uint8_t previousColor = gfx_SetColor(0);
+            gfx_FillRectangle_NoClip(m_tail.position.x, m_tail.position.y, BLOCK_SIZE, BLOCK_SIZE);
+            gfx_SetColor(previousColor);
         }
 
         DrawTile(snakeTiles, m_tail.position, snakeTile, transformA, transformB);
@@ -308,11 +365,7 @@ inline void Snake::DrawTile(gfx_sprite_t* snakeTiles, Vector2D<int24_t> position
     if (!((0 <= position.x && position.x <= (LCD_WIDTH - BLOCK_SIZE)) &&
         (0 <= position.y && position.y <= (LCD_HEIGHT - BLOCK_SIZE)))
         ) return;
-
-    uint8_t previousColor = gfx_SetColor(0);
-    gfx_FillRectangle_NoClip(position.x, position.y, BLOCK_SIZE, BLOCK_SIZE);
-    gfx_SetColor(previousColor);
-
+    
     gfx_TransparentSpritePartial(snakeTiles, position.x, position.y, tile.x, tile.y, transformA, transformB);
 }
 
@@ -342,16 +395,7 @@ void Snake::DrawStraightSegments(gfx_sprite_t* snakeTiles, Vector2D<int24_t> sta
         : (step.x > 0 ? position.x < end.x : position.x > end.x)
         )
     {
-        if ((0 <= position.x && position.x <= (LCD_WIDTH - BLOCK_SIZE)) &&
-            (0 <= position.y && position.y <= (LCD_HEIGHT - BLOCK_SIZE)))
-        {
-            uint8_t previousColor = gfx_SetColor(0);
-            gfx_FillRectangle_NoClip(position.x, position.y, BLOCK_SIZE, BLOCK_SIZE);
-            gfx_SetColor(previousColor);
-
-            gfx_TransparentSpritePartial_NoClip(snakeTiles, position.x, position.y, 1, 0, IS_HORIZONTAL(lineDirection) ? gfx_RotateSpriteC : nullptr);
-        }
-
+        DrawTile(snakeTiles, position, Vector2D<uint8_t>(1, 0), IS_HORIZONTAL(lineDirection) ? gfx_RotateSpriteC : nullptr);
         position += step;
     }
 }

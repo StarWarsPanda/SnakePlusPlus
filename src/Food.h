@@ -22,7 +22,7 @@ class Food
 
         bool IsInsideFood(Vector2D<int24_t> position) const;
         bool IsGolden() const;
-        void Eat(const Snake* snake = nullptr);
+        void Eat(Snake* snake = nullptr);
 
         void Update();
         void Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood) const;

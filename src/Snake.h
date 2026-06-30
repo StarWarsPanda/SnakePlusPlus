@@ -40,8 +40,10 @@ class Snake
         };
 
     public:
-        Snake(Vector2D<int24_t> startPosition, Direction startDirection, uint8_t defaultSize);
+        Snake(Vector2D<int24_t> startPosition, Direction startDirection, uint8_t defaultSize, const uint24_t& frame);
         ~Snake();
+
+        void Reset();
 
         void Update();
         void ChangeDirection(Direction newDirection);
@@ -57,7 +59,8 @@ class Snake
         Direction GetTailDirection() const;
 
         uint24_t GetScore() const;
-
+    public:
+        uint24_t golden = 0;
     private:
         static inline void DrawTile(gfx_sprite_t* snakeTiles, Vector2D<int24_t> position, Vector2D<uint8_t> tile, gfx_sprite_t* (*transformA)(const gfx_sprite_t* __restrict, gfx_sprite_t* __restrict) = nullptr, gfx_sprite_t* (*transformB)(const gfx_sprite_t* __restrict, gfx_sprite_t* __restrict) = nullptr);
         static void DrawStraightSegments(gfx_sprite_t* snakeTiles, Vector2D<int24_t> start, Vector2D<int24_t> end, Direction lineDirection);
@@ -75,4 +78,8 @@ class Snake
         bool m_isAddingLength = false;
 
         SnakeType m_snakeType = SnakeType::classic;
+        const uint24_t& m_frame;
+
+        const Vector2D<int24_t> m_resetStartPosition;
+        const Direction m_resetStartDirection;
 };
