@@ -29,3 +29,20 @@ Allows for a fully-customizable themeing control with saving using an `AppVar`
 > Coming in a later release (for things like high-score, food eaten, etc.)
 ---
 Using the [TI-84 Plus CE Calculator Toolchain](https://github.com/CE-Programming/toolchain)
+
+## Building
+
+Clone the repository into a local folder
+
+### Manual
+
+Follow the building instruction on the [CE C/C++ Toolchain](https://ce-programming.github.io/toolchain/static/getting-started.html) documnetation
+
+### IDE
+
+- Install [premake5](https://premake.github.io/)
+- Make sure your IDE has build commands and a project can be created by premake
+
+```bash
+premake5 [ide name] 
+```

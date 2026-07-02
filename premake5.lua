@@ -21,14 +21,14 @@ project "SNAKEPP"
 
     filter "configurations:Debug"
         defines { "_DEBUG" }
-        buildcommands { "make debug" }
-        rebuildcommands { "make clean", "make debug" }
-        cleancommands { "make clean" }
+        buildcommands   { 'cmd /C "call ' .. path.join(ce_dev_root, "cedev.bat") .. ' && make debug"' }
+        rebuildcommands { 'cmd /C "call ' .. path.join(ce_dev_root, "cedev.bat") .. ' && make clean"', 'cmd /C "call ' .. path.join(ce_dev_root, "cedev.bat") .. ' && make debug"' }
+        cleancommands   { 'cmd /C "call ' .. path.join(ce_dev_root, "cedev.bat") .. ' && make clean"' }
 
     filter "configurations:Release"
         defines { "NDEBUG" }
-        buildcommands { "make" }
-        rebuildcommands { "make clean", "make" }
-        cleancommands { "make clean" }
+        buildcommands   { 'cmd /C "call ' .. path.join(ce_dev_root, "cedev.bat") .. ' && make"' }
+        rebuildcommands { 'cmd /C "call ' .. path.join(ce_dev_root, "cedev.bat") .. ' && make clean"', 'cmd /C "call ' .. path.join(ce_dev_root, "cedev.bat") .. ' && make"' }
+        cleancommands   { 'cmd /C "call ' .. path.join(ce_dev_root, "cedev.bat") .. ' && make clean"' }
 
     filter {}

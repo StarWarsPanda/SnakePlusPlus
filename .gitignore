@@ -1,0 +1,12 @@
+/.vs
+/bin
+/obj
+*.sln
+*.vcxproj
+*.filters
+*.user
+/src/gfx/food
+/src/gfx/snake
+/src/gfx
+/src/fnt
+/src/data
