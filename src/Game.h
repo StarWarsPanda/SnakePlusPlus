@@ -164,7 +164,7 @@ class GUI
         uint24_t AllocId();
         void AdvanceCursor(int itemWidth, int itemHeight);
     private:
-        FocusState m_focus = { 0, 0, 0, 1, 99 };
+        FocusState m_focus = { 0, 0, 0, 1, 0 };
         Panel m_panelStack[8];
         Panel* m_currentPanel = nullptr;
         uint8_t m_panelDepth = 0;

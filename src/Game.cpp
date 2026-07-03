@@ -159,6 +159,7 @@ void Game::StageGameSelect()
     if (m_gui.Button(20, 200, 120, 30, "BACK"))
     {
         m_currentStage = main;
+        m_gui.SetFocusId(0);
     }
 
     m_gui.style.itemPadding = previousItemPadding;
@@ -1080,7 +1081,7 @@ GUI::InteractionState GUI::QueryInteraction(int id)
         }
         else
         {
-            m_focus.focusedId = (m_focus.focusedId + 1) % m_focus.maxId;
+            IncrementWrap(m_focus.focusedId, 0, m_focus.maxId);
         }
     }
 
@@ -1096,7 +1097,7 @@ GUI::InteractionState GUI::QueryInteraction(int id)
         }
         else
         {
-            m_focus.focusedId = (m_focus.focusedId - 1) % m_focus.maxId;
+            DecrementWrap(m_focus.focusedId, 0, m_focus.maxId);
         }
     }
 
