@@ -360,6 +360,13 @@ uint24_t Snake::GetScore() const
     return m_snakeSize - m_defaultSnakeSize;
 }
 
+Snake::SnakeType Snake::SetType(SnakeType type)
+{
+    const Snake::SnakeType oldType = m_snakeType;
+    m_snakeType = type;
+    return oldType;
+}
+
 inline void Snake::DrawTile(gfx_sprite_t* snakeTiles, Vector2D<int24_t> position, Vector2D<uint8_t> tile, gfx_sprite_t* (*transformA)(const gfx_sprite_t* __restrict, gfx_sprite_t* __restrict), gfx_sprite_t* (*transformB)(const gfx_sprite_t* __restrict, gfx_sprite_t* __restrict))
 {
     if (!((0 <= position.x && position.x <= (LCD_WIDTH - BLOCK_SIZE)) &&

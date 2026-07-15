@@ -271,6 +271,7 @@ class Game
 
         bool     m_exit = false;
         bool     m_isFirst = true;
+        bool     m_isSecond = false;
         uint24_t m_frame = 0;
         uint24_t m_golden = 0;
         uint24_t m_previousScore = 0;

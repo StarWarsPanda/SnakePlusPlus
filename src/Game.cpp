@@ -59,7 +59,7 @@ void Game::Run()
 {
     while (!m_exit)
     {
-        if ((m_currentStage == Stage::game && !m_isFirst) || m_currentStage == Stage::pause)
+        if ((m_currentStage == Stage::game || m_currentStage == Stage::pause) && !m_isFirst)
         {
             gfx_BlitScreen();
         }
@@ -68,7 +68,6 @@ void Game::Run()
             gfx_ZeroScreen();
         }
 
-        if (m_isFirst) m_isFirst = false;
         m_gui.navKeys.Update();
 
         if (m_gui.navKeys.exit.IsDown())
@@ -92,6 +91,17 @@ void Game::Run()
             case pause:       StagePause();      break;
 
             default: StageUnknown(); break;
+        }
+
+        if (m_isSecond && m_isFirst)
+        {
+            m_isFirst  = false;
+            m_isSecond = false;
+        }
+
+        if (m_isFirst)
+        {
+            m_isSecond = true;
         }
 
         m_gui.End();
@@ -145,8 +155,10 @@ void Game::StageGameSelect()
 
     if (m_gui.ButtonAt(80, 30, "CLASSIC"))
     {
+        m_snake.SetType(Snake::SnakeType::classic);
         m_currentStage = game;
         m_isFirst = true;
+        return;
     }
 
     m_gui.ButtonAt(80, 30); // WRAP
@@ -176,11 +188,6 @@ void Game::StageStory()
 
 void Game::StageGame()
 {
-    if (m_isFirst)
-    {
-        gfx_ZeroScreen();
-    }
-
     if (m_gui.navKeys.back.OnRisingEdge())
     {
         m_currentStage = pause;
@@ -692,16 +699,19 @@ void Game::StagePause()
     {
         m_currentStage = game;
         m_isFirst = true;
+        return;
     }
 
     if (m_gui.ButtonAt(172, 30, "SETTINGS"))
     {
         m_currentStage = Stage::options;
+        return;
     }
 
     if (m_gui.ButtonAt(172, 30, "BACK TO MENU"))
     {
         m_currentStage = Stage::main;
+        return;
     }
 
     m_gui.EndPanel();

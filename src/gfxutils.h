@@ -9,7 +9,7 @@
 #define BLOCK_SIZE 10
 #endif
 
-#ifdef WIN32
+#ifdef MSVC
 #define int24_t int32_t
 #define uint24_t uint32_t
 #endif
