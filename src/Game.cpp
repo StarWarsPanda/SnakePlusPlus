@@ -238,6 +238,11 @@ void Game::StageGame()
 
     const uint24_t score = m_snake.GetScore();
 
+    if (score > m_highScore)
+    {
+        m_highScore = score;
+    }
+
     char buffer[12];
     snprintf(buffer, sizeof(buffer), "Score: %d", score);
 
@@ -343,6 +348,10 @@ void Game::StageStore()
 
 void Game::StageStats()
 {
+    gfx_PrintStringXY("Highscore: ", 5, 5);
+    gfx_SetTextXY(100, 5);
+    gfx_PrintInt(m_highScore, 1);
+
     if (m_gui.Button(20, 180, 80, 30, "BACK"))
     {
         m_currentStage = options;
