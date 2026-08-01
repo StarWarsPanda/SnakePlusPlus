@@ -14,8 +14,8 @@
 #define uint24_t uint32_t
 #endif
 
-#define IncrementWrap(x, min, max) do { if ((x + 1) > (max)) (x) = (min); else ++(x); } while (0)
-#define DecrementWrap(x, min, max) do { if ((x - 1) < (min)) (x) = (max); else --(x); } while (0)
+#define IncrementWrap(x, min, max, inc) do { if ((x) > ((max) - (inc))){ (x) = (min); }else{ (x) += (inc);}} while (0)
+#define DecrementWrap(x, min, max, dec) do { if ((x) < ((min) + (dec))){ (x) = (max); }else{ (x) -= (dec);}} while (0)
 
 #define gfx_ResetClipRegion() gfx_SetClipRegion(0, 0, GFX_LCD_WIDTH, GFX_LCD_HEIGHT)
 
@@ -23,6 +23,8 @@
 #define gfx_ResetColor() gfx_SetColor(gfx_BeforeColor)
 
 #define gfx_1555ToRGB(c, out_r, out_g, out_b) do { (out_r) = (uint8_t)((((c) >> 10) & 0x1F) << 3); (out_g) = (uint8_t)((((c) >>  5) & 0x1F) << 3); (out_b) = (uint8_t)(((c) & 0x1F) << 3); } while (0)
+
+#define gfx_CheckRectanglePoint(x0, y0, rx, ry, rw, rh) (((x0) >= (rx)) && ((x0) < ((rx) + (rw))) && ((y0) >= (ry)) && ((y0) < ((ry) + (rh))))
 
 typedef enum 
 {
@@ -32,6 +34,14 @@ typedef enum
     Right = 3,
     Size
 }Direction;
+
+template <typename T>
+class Rectangle
+{
+    public:
+        Vector2D<T> position;
+        Vector2D<T> size;
+};
 
 #define IS_VERTICAL(direction) (((direction) & 1) == 0)
 #define IS_HORIZONTAL(direction) (((direction) & 1) == 1)

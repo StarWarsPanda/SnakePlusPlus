@@ -161,7 +161,14 @@ void Game::StageGameSelect()
         return;
     }
 
-    m_gui.ButtonAt(80, 30); // WRAP
+    if (m_gui.ButtonAt(80, 30, "WRAP"))
+    {
+        m_snake.SetType(Snake::SnakeType::wrap);
+        m_currentStage = game;
+        m_isFirst = true;
+        return;
+    }
+
     m_gui.ButtonAt(80, 30); // WIMGED
     m_gui.ButtonAt(80, 30); // WALLS
     m_gui.ButtonAt(80, 30); // VS
@@ -312,12 +319,12 @@ void Game::StageStore()
     {
         if (m_gui.navKeys.left.OnRisingEdge())
         {
-            DecrementWrap(m_storeSnakeSelected, 0, Snake::SnakeSkin::size - 1);
+            DecrementWrap(m_storeSnakeSelected, 0, Snake::SnakeSkin::size - 1, 1);
         }
 
         if (m_gui.navKeys.right.OnRisingEdge())
         {
-            IncrementWrap(m_storeSnakeSelected, 0, Snake::SnakeSkin::size - 1);
+            IncrementWrap(m_storeSnakeSelected, 0, Snake::SnakeSkin::size - 1, 1);
         }
 
         if (m_gui.navKeys.down.OnRisingEdge())
@@ -421,12 +428,12 @@ void Game::StageUIChange()
         {
             if (m_gui.navKeys.down.OnRisingEdge())
             {
-                IncrementWrap(m_styleOption, 0, style_strings_length + 1);
+                IncrementWrap(m_styleOption, 0, style_strings_length + 1, 1);
             }
 
             if (m_gui.navKeys.up.OnRisingEdge())
             {
-                DecrementWrap(m_styleOption, 0, style_strings_length + 1);
+                DecrementWrap(m_styleOption, 0, style_strings_length + 1, 1);
             }
         }
         else if(m_styleOption <= 8)
@@ -443,12 +450,12 @@ void Game::StageUIChange()
 
             if (m_gui.navKeys.right.OnRisingEdge())
             {
-                IncrementWrap(m_selectedChannel, 0, 3);
+                IncrementWrap(m_selectedChannel, 0, 3, 1);
             }
 
             if (m_gui.navKeys.left.OnRisingEdge())
             {
-                DecrementWrap(m_selectedChannel, 0, 3);
+                DecrementWrap(m_selectedChannel, 0, 3, 1);
             }
 
             gfx_SetTextXY(180, 20);
@@ -508,12 +515,12 @@ void Game::StageUIChange()
         {
             if (m_gui.navKeys.down.OnRisingEdge())
             {
-                IncrementWrap(m_gui.style.itemPadding, 0, 12);
+                IncrementWrap(m_gui.style.itemPadding, 0, 12, 1);
             }
 
             if (m_gui.navKeys.up.OnRisingEdge())
             {
-                DecrementWrap(m_gui.style.itemPadding, 0, 12);
+                DecrementWrap(m_gui.style.itemPadding, 0, 12, 1);
             }
 
             gfx_SetTextXY(180, 20);
@@ -562,12 +569,12 @@ void Game::StageUIChange()
         {
             if (m_gui.navKeys.down.OnRisingEdge())
             {
-                IncrementWrap(m_gui.style.borderSize, 0, 5);
+                IncrementWrap(m_gui.style.borderSize, 0, 5, 1);
             }
 
             if (m_gui.navKeys.up.OnRisingEdge())
             {
-                DecrementWrap(m_gui.style.borderSize, 0, 5);
+                DecrementWrap(m_gui.style.borderSize, 0, 5, 1);
             }
 
             gfx_SetTextXY(180, 20);
@@ -580,12 +587,12 @@ void Game::StageUIChange()
         {
             if (m_gui.navKeys.down.OnRisingEdge())
             {
-                IncrementWrap(m_gui.style.cornerRadius, 0, 12);
+                IncrementWrap(m_gui.style.cornerRadius, 0, 12, 1);
             }
 
             if (m_gui.navKeys.up.OnRisingEdge())
             {
-                DecrementWrap(m_gui.style.cornerRadius, 0, 12);
+                DecrementWrap(m_gui.style.cornerRadius, 0, 12, 1);
             }
 
             gfx_SetTextXY(180, 20);
@@ -1100,7 +1107,7 @@ GUI::InteractionState GUI::QueryInteraction(int id)
         }
         else
         {
-            IncrementWrap(m_focus.focusedId, 0, m_focus.maxId);
+            IncrementWrap(m_focus.focusedId, 0, m_focus.maxId, 1);
         }
     }
 
@@ -1116,7 +1123,7 @@ GUI::InteractionState GUI::QueryInteraction(int id)
         }
         else
         {
-            DecrementWrap(m_focus.focusedId, 0, m_focus.maxId);
+            DecrementWrap(m_focus.focusedId, 0, m_focus.maxId, 1);
         }
     }
 

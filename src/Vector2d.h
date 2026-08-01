@@ -1,9 +1,5 @@
 #pragma once
 
-#include <tice.h>
-#include <math.h>
-#include <graphx.h>
-
 #define MAX_ITERATIONS 5
 
 template <typename T>

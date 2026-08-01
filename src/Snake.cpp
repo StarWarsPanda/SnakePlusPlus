@@ -96,11 +96,21 @@ void Snake::Update()
     {
         case Up:
         case Down:
-            m_head.position.y += (static_cast<int24_t>(m_head.direction) - 1) * BLOCK_SIZE;
+            m_head.position.y += ((static_cast<int24_t>(m_head.direction) - 1) * BLOCK_SIZE);
+            if (m_snakeType == SnakeType::wrap)
+            {
+                IncrementWrap(m_head.position.y, 0, GFX_LCD_HEIGHT - BLOCK_SIZE, 0);
+                DecrementWrap(m_head.position.y, 0, GFX_LCD_HEIGHT - BLOCK_SIZE, 0);
+            }
             break;
         case Left:
         case Right:
-            m_head.position.x += (static_cast<int24_t>(m_head.direction) - 2) * BLOCK_SIZE;
+            m_head.position.x += ((static_cast<int24_t>(m_head.direction) - 2) * BLOCK_SIZE) % (GFX_LCD_WIDTH - BLOCK_SIZE + 1);
+            if (m_snakeType == SnakeType::wrap)
+            {
+                IncrementWrap(m_head.position.x, 0, GFX_LCD_WIDTH - BLOCK_SIZE, 0);
+                DecrementWrap(m_head.position.x, 0, GFX_LCD_WIDTH - BLOCK_SIZE, 0);
+            }
             break;
         case Size:
         default:
@@ -113,11 +123,15 @@ void Snake::Update()
         {
             case Up:
             case Down:
-                m_tail.position.y += (static_cast<int24_t>(m_tail.direction) - 1) * BLOCK_SIZE;
+                m_tail.position.y += ((static_cast<int24_t>(m_tail.direction) - 1) * BLOCK_SIZE);
+                IncrementWrap(m_tail.position.y, 0, GFX_LCD_HEIGHT - BLOCK_SIZE, 0);
+                DecrementWrap(m_tail.position.y, 0, GFX_LCD_HEIGHT - BLOCK_SIZE, 0);
                 break;
             case Left:
             case Right:
-                m_tail.position.x += (static_cast<int24_t>(m_tail.direction) - 2) * BLOCK_SIZE;
+                m_tail.position.x += ((static_cast<int24_t>(m_tail.direction) - 2) * BLOCK_SIZE);
+                IncrementWrap(m_tail.position.x, 0, GFX_LCD_WIDTH - BLOCK_SIZE, 0);
+                DecrementWrap(m_tail.position.x, 0, GFX_LCD_WIDTH - BLOCK_SIZE, 0);
                 break;
             case Size:
             default:
@@ -166,6 +180,11 @@ void Snake::Draw(gfx_sprite_t* snakeTiles, const Vector2D<int24_t>& foodPosition
             IS_HORIZONTAL(m_head.direction) ? BLOCK_SIZE * (m_head.direction == Direction::Left ? -1 : 1) : 0,
             IS_VERTICAL(m_head.direction) ? BLOCK_SIZE * (m_head.direction == Direction::Up ? -1 : 1) : 0
         );
+
+        DecrementWrap(position.x, 0, GFX_LCD_WIDTH - BLOCK_SIZE, 0);
+        IncrementWrap(position.x, 0, GFX_LCD_WIDTH - BLOCK_SIZE, 0);
+        DecrementWrap(position.y, 0, GFX_LCD_HEIGHT - BLOCK_SIZE, 0);
+        IncrementWrap(position.y, 0, GFX_LCD_HEIGHT - BLOCK_SIZE, 0);
 
         uint8_t previousColor = gfx_SetColor(0);
         gfx_FillRectangle_NoClip(position.x, position.y, BLOCK_SIZE, BLOCK_SIZE);
@@ -289,47 +308,40 @@ void Snake::Draw(gfx_sprite_t* snakeTiles, const Vector2D<int24_t>& foodPosition
 
 bool Snake::CheckCollision(const Vector2D<int24_t>* other) const
 {
-    const bool otherExists = other != nullptr;
-    const Vector2D<int24_t> testPosition = otherExists ? *other : m_head.position;
+    const Vector2D<int24_t> testPosition = other ? *other : m_head.position;
 
-    if (testPosition == m_tail.position && (!otherExists || testPosition == m_head.position))
-        return true;
-
-    if (!otherExists && m_snakeType == SnakeType::classic && !(gfx_CheckRectangleHotspot(
+    if (m_snakeType == SnakeType::classic && !(gfx_CheckRectangleHotspot(
         testPosition.x, testPosition.y, BLOCK_SIZE, BLOCK_SIZE,
-        0, 0, LCD_WIDTH, LCD_HEIGHT
+        0, 0, GFX_LCD_WIDTH, GFX_LCD_HEIGHT
     ))) return true;
 
-    if (m_segmentLength > 0)
+    if (gfx_CheckRectangleHotspot(
+        testPosition.x, testPosition.y, BLOCK_SIZE, BLOCK_SIZE,
+        m_tail.position.x, m_tail.position.y, BLOCK_SIZE, BLOCK_SIZE
+    )) return true;
+
+    if (m_segmentLength == 0)
+        return false;
+
+    if (m_segmentLength == 1)
     {
-        if (m_segmentLength > 1)
+        if (gfx_CheckRectangleHotspot(
+            testPosition.x, testPosition.y, BLOCK_SIZE, BLOCK_SIZE,
+            m_segments[0].position.x, m_segments[0].position.y, BLOCK_SIZE, BLOCK_SIZE
+        )) return true;
+    }
+
+    for (size_t i = 1; i < m_segmentLength; ++i)
+    {
+        if (CheckCollisionSegments(testPosition, m_segments[i - 1], m_segments[i]))
         {
-            for (size_t i = 1; i < m_segmentLength; i++)
-            {
-                const SnakeSegment& segment = m_segments[i];
-                const SnakeSegment& previousSegment = m_segments[i - 1];
-
-                const Vector2D<int24_t> position = segment.position.Min(previousSegment.position);
-                const Vector2D<int24_t> size = (previousSegment.position - segment.position).Absolute() + BLOCK_SIZE;
-
-                if (
-                    testPosition.x >= position.x &&
-                    testPosition.x < position.x + size.x &&
-                    testPosition.y >= position.y &&
-                    testPosition.y < position.y + size.y
-                    ) return true;
-            }
+            return true;
         }
+    }
 
-        const Vector2D<int24_t> position = m_segments[m_segmentLength - 1].position.Min(m_tail.position);
-        const Vector2D<int24_t> size = (m_segments[m_segmentLength - 1].position - m_tail.position).Absolute() + BLOCK_SIZE;
-
-        if (
-            testPosition.x >= position.x &&
-            testPosition.x < position.x + size.x &&
-            testPosition.y >= position.y &&
-            testPosition.y < position.y + size.y
-            ) return true;
+    if (CheckCollisionSegments(testPosition, m_segments[m_segmentLength - 1], m_tail))
+    {
+        return true;
     }
 
     return false;
@@ -369,8 +381,8 @@ Snake::SnakeType Snake::SetType(SnakeType type)
 
 inline void Snake::DrawTile(gfx_sprite_t* snakeTiles, Vector2D<int24_t> position, Vector2D<uint8_t> tile, gfx_sprite_t* (*transformA)(const gfx_sprite_t* __restrict, gfx_sprite_t* __restrict), gfx_sprite_t* (*transformB)(const gfx_sprite_t* __restrict, gfx_sprite_t* __restrict))
 {
-    if (!((0 <= position.x && position.x <= (LCD_WIDTH - BLOCK_SIZE)) &&
-        (0 <= position.y && position.y <= (LCD_HEIGHT - BLOCK_SIZE)))
+    if (!((0 <= position.x && position.x <= (GFX_LCD_WIDTH - BLOCK_SIZE)) &&
+        (0 <= position.y && position.y <= (GFX_LCD_HEIGHT - BLOCK_SIZE)))
         ) return;
     
     gfx_TransparentSpritePartial(snakeTiles, position.x, position.y, tile.x, tile.y, transformA, transformB);
@@ -405,4 +417,103 @@ void Snake::DrawStraightSegments(gfx_sprite_t* snakeTiles, Vector2D<int24_t> sta
         DrawTile(snakeTiles, position, Vector2D<uint8_t>(1, 0), IS_HORIZONTAL(lineDirection) ? gfx_RotateSpriteC : nullptr);
         position += step;
     }
+}
+
+inline bool Snake::CheckCollisionSegments(const Vector2D<int24_t>& testPosition, const SnakeSegment& a, const SnakeSegment& b) const
+{
+    if (gfx_CheckRectangleHotspot(
+        testPosition.x, testPosition.y, BLOCK_SIZE, BLOCK_SIZE,
+        b.position.x, b.position.y, BLOCK_SIZE, BLOCK_SIZE
+    )) return true;
+
+    Rectangle<int24_t> aRect{
+        b.position,
+        { BLOCK_SIZE, BLOCK_SIZE }
+    };
+
+    bool checkPrevious = false; /* Only check if the rects are different (e.g. wrapped) */
+    Rectangle<int24_t> bRect{
+        b.position,
+        { BLOCK_SIZE, BLOCK_SIZE }
+    };
+
+    switch (b.direction)
+    {
+    case Direction::Up:
+        if (a.position.y < b.position.y)
+        {
+            aRect.position.y = a.position.y;
+        }
+        else
+        {
+            aRect.position.y = 0;
+            bRect.position.y = a.position.y + BLOCK_SIZE;
+            bRect.size.y = GFX_LCD_HEIGHT - bRect.position.y;
+            checkPrevious = true;
+        }
+
+        aRect.size.y = b.position.y - aRect.position.y;
+
+        break;
+    case Direction::Left:
+        if (a.position.x < b.position.x)
+        {
+            aRect.position.x = a.position.x;
+        }
+        else
+        {
+            aRect.position.x = 0;
+            bRect.position.x = a.position.x + BLOCK_SIZE;
+            bRect.size.x = GFX_LCD_WIDTH - bRect.position.x;
+            checkPrevious = true;
+        }
+
+        aRect.size.x = b.position.x - aRect.position.x;
+
+        break;
+    case Direction::Down:
+        aRect.position.y = b.position.y + BLOCK_SIZE;
+
+        if (a.position.y > b.position.y)
+        {
+            aRect.size.y = a.position.y - aRect.position.y;
+        }
+        else
+        {
+            aRect.size.y = GFX_LCD_HEIGHT - a.position.y;
+            bRect.position.y = 0;
+            bRect.size.y = a.position.y - bRect.position.y;
+            checkPrevious = true;
+        }
+
+        break;
+    case Direction::Right:
+        aRect.position.x = b.position.x + BLOCK_SIZE;
+
+        if (a.position.x > b.position.x)
+        {
+            aRect.size.x = a.position.x - aRect.position.x;
+        }
+        else
+        {
+            aRect.size.x = GFX_LCD_WIDTH - a.position.x;
+            bRect.position.x = 0;
+            bRect.size.x = a.position.x - bRect.position.x;
+            checkPrevious = true;
+        }
+
+        break;
+    }
+
+    if (gfx_CheckRectangleHotspot(
+        testPosition.x, testPosition.y, BLOCK_SIZE, BLOCK_SIZE,
+        aRect.position.x, aRect.position.y, aRect.size.x, aRect.size.y
+    )) return true;
+
+    if (gfx_CheckRectangleHotspot(
+        testPosition.x, testPosition.y, BLOCK_SIZE, BLOCK_SIZE,
+        bRect.position.x, bRect.position.y, bRect.size.x, bRect.size.y
+    )) return true;
+
+    return false;
 }

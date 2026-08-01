@@ -8,7 +8,7 @@
 #include "gfxutils.h"
 
 #define BLOCK_SIZE 10
-#define MAX_SNAKE_SEGMENTS ((LCD_WIDTH * LCD_HEIGHT) / (BLOCK_SIZE * BLOCK_SIZE) - 2)
+#define MAX_SNAKE_SEGMENTS ((GFX_LCD_WIDTH * GFX_LCD_HEIGHT) / (BLOCK_SIZE * BLOCK_SIZE) - 2)
 
 class Snake
 {
@@ -66,7 +66,7 @@ class Snake
     private:
         static inline void DrawTile(gfx_sprite_t* snakeTiles, Vector2D<int24_t> position, Vector2D<uint8_t> tile, gfx_sprite_t* (*transformA)(const gfx_sprite_t* __restrict, gfx_sprite_t* __restrict) = nullptr, gfx_sprite_t* (*transformB)(const gfx_sprite_t* __restrict, gfx_sprite_t* __restrict) = nullptr);
         static void DrawStraightSegments(gfx_sprite_t* snakeTiles, Vector2D<int24_t> start, Vector2D<int24_t> end, Direction lineDirection);
-
+        inline bool CheckCollisionSegments(const Vector2D<int24_t>& testPosition, const SnakeSegment& a, const SnakeSegment& b) const;
     private:
         static SnakeSegment m_segments[MAX_SNAKE_SEGMENTS];
 
