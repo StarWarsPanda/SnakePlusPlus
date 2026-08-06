@@ -11,12 +11,13 @@
 #include "gfx/gfx.h"
 #include "data/snippets.h"
 
-static gfx_sprite_t* const snake_skins[6] = {
+static gfx_sprite_t* const snake_skins[7] = {
 	snake_Basic_Tileset,
 	snake_Cool_Tileset,
 	snake_Coral_Tileset,
 	snake_Skeleton_Tileset,
 	snake_Steel_Tileset,
+    snake_Donut_Tileset,
 	snake_Gold_Tileset
 };
 
@@ -262,6 +263,11 @@ class Game
                 true,
                 25
             },
+            {
+                // donut
+                true,
+                50
+            },               
             {
                 // gold,
                 true,

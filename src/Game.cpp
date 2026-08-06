@@ -144,6 +144,8 @@ void Game::StageMain()
     }
 
     m_gui.EndPanel();
+
+    gfx_PrintStringXY("v1.1.1",5,227);
 }
 
 void Game::StageGameSelect()
@@ -158,6 +160,7 @@ void Game::StageGameSelect()
         m_snake.SetType(Snake::SnakeType::classic);
         m_currentStage = game;
         m_isFirst = true;
+        m_gui.style.itemPadding = previousItemPadding;
         return;
     }
 
@@ -166,6 +169,7 @@ void Game::StageGameSelect()
         m_snake.SetType(Snake::SnakeType::wrap);
         m_currentStage = game;
         m_isFirst = true;
+        m_gui.style.itemPadding = previousItemPadding;
         return;
     }
 

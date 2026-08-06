@@ -29,6 +29,7 @@ class Snake
             coral,
             skeleton,
             steel,
+            donut,
             gold,
             size
         };
