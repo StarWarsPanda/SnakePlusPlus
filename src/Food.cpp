@@ -9,7 +9,7 @@ Food::~Food() {}
 
 bool Food::IsInsideFood(Vector2D<int24_t> position) const
 {
-    return m_position == position;
+    return m_position == position || m_previousPosition == position;
 }
 
 bool Food::IsGolden() const
@@ -27,10 +27,12 @@ void Food::Eat(Snake* snake)
     do
     {
         m_position = Vector2D<int24_t>(
-            randInt(0, (LCD_WIDTH - 1) / BLOCK_SIZE) * BLOCK_SIZE,
-            randInt(0, (LCD_HEIGHT - 1) / BLOCK_SIZE) * BLOCK_SIZE
+            randInt(0, (GFX_LCD_WIDTH - 1) / BLOCK_SIZE) * BLOCK_SIZE,
+            randInt(0, (GFX_LCD_HEIGHT - 1) / BLOCK_SIZE) * BLOCK_SIZE
         );
     } while (snake != nullptr && snake->CheckCollision(&m_position));
+
+    m_direction = Direction(randInt(0, Direction::Size - 1));
 
     m_golden = randInt(0, 100) <= 15;
 }
@@ -39,19 +41,29 @@ void Food::Update()
 {
     if (m_foodType == FoodType::winged)
     {
+        m_previousPosition = m_position;
+
         switch (m_direction)
         {
             case Left: // ↖
                 m_position += Vector2D<int24_t>(-BLOCK_SIZE, -BLOCK_SIZE);
+                if (m_position.y <= 0) m_direction = Down;
+                if (m_position.x <= 0) m_direction = Up;
                 break;
             case Down: // ↙
                 m_position += Vector2D<int24_t>(-BLOCK_SIZE, BLOCK_SIZE);
+                if (m_position.y >= (GFX_LCD_HEIGHT - BLOCK_SIZE)) m_direction = Left;
+                if (m_position.x <= 0) m_direction = Right;
                 break;
             case Up: // ↗
                 m_position += Vector2D<int24_t>(BLOCK_SIZE, -BLOCK_SIZE);
+                if (m_position.y <= 0) m_direction = Right;
+                if (m_position.x >= (GFX_LCD_WIDTH - BLOCK_SIZE)) m_direction = Left;
                 break;
             case Right: // ↘
                 m_position += Vector2D<int24_t>(BLOCK_SIZE, BLOCK_SIZE);
+                if (m_position.y >= (GFX_LCD_HEIGHT - BLOCK_SIZE)) m_direction = Up;
+                if (m_position.x >= (GFX_LCD_WIDTH - BLOCK_SIZE)) m_direction = Down;
                 break;
             default:
                 break;
@@ -61,6 +73,13 @@ void Food::Update()
 
 void Food::Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood) const
 {
+    if (m_foodType == FoodType::winged)
+    {
+        gfx_SetPaletteColor(0);
+        gfx_FillRectangle_NoClip(m_previousPosition.x, m_previousPosition.y, BLOCK_SIZE, BLOCK_SIZE);
+        gfx_ResetColor();
+    }
+
     if (m_golden)
     {
         if (goldenFood == nullptr)
@@ -83,6 +102,15 @@ void Food::Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood) const
     }
 
     gfx_TransparentSprite_NoClip(food, m_position.x, m_position.y);
+}
+
+Food::FoodType Food::SetType(FoodType foodType)
+{
+    const FoodType previousFoodType = m_foodType;
+
+    m_foodType = foodType;
+
+    return previousFoodType;
 }
 
 const Vector2D<int24_t>& Food::GetPosition() const

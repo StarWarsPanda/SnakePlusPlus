@@ -145,7 +145,7 @@ void Game::StageMain()
 
     m_gui.EndPanel();
 
-    gfx_PrintStringXY("v1.1.1",5,227);
+    gfx_PrintStringXY("v1.1.2",5,227);
 }
 
 void Game::StageGameSelect()
@@ -158,6 +158,7 @@ void Game::StageGameSelect()
     if (m_gui.ButtonAt(80, 30, "CLASSIC"))
     {
         m_snake.SetType(Snake::SnakeType::classic);
+        m_food.SetType(Food::FoodType::classic);
         m_currentStage = game;
         m_isFirst = true;
         m_gui.style.itemPadding = previousItemPadding;
@@ -167,13 +168,23 @@ void Game::StageGameSelect()
     if (m_gui.ButtonAt(80, 30, "WRAP"))
     {
         m_snake.SetType(Snake::SnakeType::wrap);
+        m_food.SetType(Food::FoodType::classic);
         m_currentStage = game;
         m_isFirst = true;
         m_gui.style.itemPadding = previousItemPadding;
         return;
     }
 
-    m_gui.ButtonAt(80, 30); // WIMGED
+    if (m_gui.ButtonAt(80, 30, "WINGED"))
+    {
+        m_snake.SetType(Snake::SnakeType::classic);
+        m_food.SetType(Food::FoodType::winged);
+        m_currentStage = game;
+        m_isFirst = true;
+        m_gui.style.itemPadding = previousItemPadding;
+        return;
+    }
+
     m_gui.ButtonAt(80, 30); // WALLS
     m_gui.ButtonAt(80, 30); // VS
     
@@ -240,6 +251,11 @@ void Game::StageGame()
             m_snake.Reset();
         }
 
+        if (m_frame % 20 == 0)
+        {
+            m_food.Update();
+        }
+
         if (m_food.IsInsideFood(m_snake.GetHeadPosition()))
         {
             m_food.Eat(&m_snake);
@@ -258,7 +274,15 @@ void Game::StageGame()
     snprintf(buffer, sizeof(buffer), "Score: %d", score);
 
     if (score != m_previousScore)
+    {
+        gfx_sprite_t* scoreBackground = gfx_AllocSprite(gfx_GetStringWidth(buffer), 10, malloc);
+        gfx_GetSprite(scoreBackground, 10, 10);
         gfx_FillRectangle_NoClip(10, 10, gfx_GetStringWidth(buffer), 10);
+        gfx_SetTransparentColor(255);
+        gfx_TransparentSprite_NoClip(scoreBackground, 10, 10);
+        gfx_SetTransparentColor(101);
+        free(scoreBackground);
+    }
 
     m_food.Draw(food_Apple, golden_apple);
     m_snake.Draw(snake_skins[m_selectedSnake], m_food.GetPosition(), !m_isFirst);

@@ -10,12 +10,12 @@
 
 class Food
 {
-    typedef enum
-    {
-        classic,
-        winged
-    } FoodType;
-
+    public:
+        enum class FoodType
+        {
+            classic,
+            winged
+        };
     public:
         Food();
         ~Food();
@@ -27,14 +27,19 @@ class Food
         void Update();
         void Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood) const;
 
+        FoodType SetType(FoodType foodType);
+
         const Vector2D<int24_t>& GetPosition() const;
 
     private:
         Vector2D<int24_t> m_position = Vector2D<int24_t>(0, 0);
+        Vector2D<int24_t> m_previousPosition = Vector2D<int24_t>(0, 0);
 
         /* Direction in winged mode only; rotated by 45º clockwise */
         Direction         m_direction = Direction::Up;
 
         FoodType          m_foodType = FoodType::classic;
         bool              m_golden = false;
+
+        //gfx_sprite_t* m_moveSprite;
 };
