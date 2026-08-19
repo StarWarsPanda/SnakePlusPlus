@@ -1,8 +1,16 @@
 #include "Game.h"
 
+#include <compression.h>
+
 Game::Game()
 {
     srandom(rtc_Time());
+
+    if (SNKSPR_init() == 0)
+    {
+        m_exit = true;
+        return;
+    }
 
     gfx_Begin();
     gfx_SetDrawBuffer();
@@ -47,11 +55,53 @@ Game::Game()
 
     m_snake.golden = m_golden;
     m_storeSnakeSelected = m_selectedSnake;
+    m_currentSnake = gfx_MallocSprite(snake_Basic_Tileset_width, snake_Basic_Tileset_height);
+    m_currentFood = gfx_MallocSprite(food_Apple_width, food_Apple_height);
+    m_goldenFood = gfx_MallocSprite(food_Apple_width, food_Apple_height);
+
+    uint8_t* selectedSnakeSkin;
+
+    switch (m_selectedSnake)
+    {
+        case Snake::SnakeSkin::cool:
+            selectedSnakeSkin = snake_Cool_Tileset_compressed;
+            break;
+        case Snake::SnakeSkin::coral:
+            selectedSnakeSkin = snake_Coral_Tileset_compressed;
+            break;
+        case Snake::SnakeSkin::donut:
+            selectedSnakeSkin = snake_Donut_Tileset_compressed;
+            break;
+        case Snake::SnakeSkin::gold:
+            selectedSnakeSkin = snake_Gold_Tileset_compressed;
+            break;
+        case Snake::SnakeSkin::skeleton:
+            selectedSnakeSkin = snake_Skeleton_Tileset_compressed;
+            break;
+        case Snake::SnakeSkin::steel:
+            selectedSnakeSkin = snake_Steel_Tileset_compressed;
+            break;
+        case Snake::SnakeSkin::basic:
+        default:
+            selectedSnakeSkin = snake_Basic_Tileset_compressed;
+            break;
+    }
+
+    zx0_Decompress(m_currentSnake, selectedSnakeSkin);
+
+    zx0_Decompress(m_currentFood, food_Apple_compressed);
+
+    zx0_Decompress(m_goldenFood, golden_apple_compressed);
 }
 
 Game::~Game()
 {
     Save();
+
+    free(m_currentSnake);
+    free(m_currentFood);
+    free(m_goldenFood);
+
     gfx_End();
 }
 
@@ -145,7 +195,7 @@ void Game::StageMain()
 
     m_gui.EndPanel();
 
-    gfx_PrintStringXY("v1.1.2",5,227);
+    gfx_PrintStringXY("v1.1.3",5,227);
 }
 
 void Game::StageGameSelect()
@@ -284,8 +334,8 @@ void Game::StageGame()
         free(scoreBackground);
     }
 
-    m_food.Draw(food_Apple, golden_apple);
-    m_snake.Draw(snake_skins[m_selectedSnake], m_food.GetPosition(), !m_isFirst);
+    m_food.Draw(m_currentFood, m_goldenFood);
+    m_snake.Draw(m_currentSnake, m_food.GetPosition(), !m_isFirst);
 
     gfx_PrintStringXY(buffer, 10, 10);
 
@@ -294,7 +344,7 @@ void Game::StageGame()
 
 void Game::StageStore()
 {
-    gfx_TransparentSprite_NoClip(golden_apple, 5, 5);
+    gfx_TransparentSprite_NoClip(m_goldenFood, 5, 5);
     gfx_SetTextXY(20, 5);
     gfx_PrintInt(m_golden, 1);
 
@@ -307,16 +357,14 @@ void Game::StageStore()
 
     GUI::DrawRoundRect(30, 30, 260, 130, m_gui.style.colorButton, m_gui.style.colorBorder, m_gui.style.cornerRadius);
     GUI::DrawRoundRect(40, 40, 20, 110, m_gui.style.colorButton, m_gui.GetFocusedId() == -1 ? m_gui.style.colorHighlight : m_gui.style.colorBorder, m_gui.style.cornerRadius);
-    
-    gfx_sprite_t* selectedSnakeTileset = snake_skins[m_storeSnakeSelected];
 
     if (m_collectables[m_storeSnakeSelected].locked)
     {
-        selectedSnakeTileset = snake_Invalid_Tileset;
+        zx0_Decompress(m_currentSnake, snake_Invalid_Tileset_compressed);
 
         if (m_collectables[m_storeSnakeSelected].cost > 0)
         {
-            gfx_TransparentSprite_NoClip(golden_apple, 70, 142);
+            gfx_TransparentSprite_NoClip(m_goldenFood, 70, 142);
             gfx_SetTextXY(85, 142);
             gfx_PrintInt(m_collectables[m_storeSnakeSelected].cost, 1);
         }
@@ -334,7 +382,7 @@ void Game::StageStore()
         gfx_PrintStringXY("Selected", 30, 20);
     }
 
-    snake.Draw(selectedSnakeTileset, Vector2D<int24_t>(-50, -50), false);
+    snake.Draw(m_currentSnake, Vector2D<int24_t>(-50, -50), false);
 
     gfx_PrintStringXY(SnakeType(m_storeSnakeSelected), 70, 40);
 
@@ -345,6 +393,9 @@ void Game::StageStore()
 
     if (m_gui.GetFocusedId() == -1)
     {
+        const uint8_t previousStoreSnakeSelected = m_storeSnakeSelected;
+        const uint24_t previousGolden = m_golden;
+
         if (m_gui.navKeys.left.OnRisingEdge())
         {
             DecrementWrap(m_storeSnakeSelected, 0, Snake::SnakeSkin::size - 1, 1);
@@ -372,12 +423,75 @@ void Game::StageStore()
         {
             m_selectedSnake = (Snake::SnakeSkin)m_storeSnakeSelected;
         }
+
+        if (previousStoreSnakeSelected != m_storeSnakeSelected || previousGolden != m_golden)
+        {
+            uint8_t* selectedSnakeSkin;
+
+            switch (m_storeSnakeSelected)
+            {
+            case Snake::SnakeSkin::cool:
+                selectedSnakeSkin = snake_Cool_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::coral:
+                selectedSnakeSkin = snake_Coral_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::donut:
+                selectedSnakeSkin = snake_Donut_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::gold:
+                selectedSnakeSkin = snake_Gold_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::skeleton:
+                selectedSnakeSkin = snake_Skeleton_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::steel:
+                selectedSnakeSkin = snake_Steel_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::basic:
+            default:
+                selectedSnakeSkin = snake_Basic_Tileset_compressed;
+                break;
+            }
+
+            zx0_Decompress(m_currentSnake, selectedSnakeSkin);
+        }
     }
 
     if (m_gui.Button(30, 180, 80, 30, "BACK"))
     {
         m_currentStage = main;
         m_gui.SetFocusId(3);
+
+        uint8_t* selectedSnakeSkin;
+
+        switch (m_selectedSnake)
+        {
+            case Snake::SnakeSkin::cool:
+                selectedSnakeSkin = snake_Cool_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::coral:
+                selectedSnakeSkin = snake_Coral_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::donut:
+                selectedSnakeSkin = snake_Donut_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::gold:
+                selectedSnakeSkin = snake_Gold_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::skeleton:
+                selectedSnakeSkin = snake_Skeleton_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::steel:
+                selectedSnakeSkin = snake_Steel_Tileset_compressed;
+                break;
+            case Snake::SnakeSkin::basic:
+            default:
+                selectedSnakeSkin = snake_Basic_Tileset_compressed;
+                break;
+        }
+
+        zx0_Decompress(m_currentSnake, selectedSnakeSkin);
     }
 }
 

@@ -1,0 +1,47 @@
+palettes:
+  - name: full_palette
+    fixed-entries:
+        - color: {index: 0, r: 16, g: 48, b: 65}
+        - color: {index: 1, r: 35, g: 58, b: 78}
+        - color: {index: 2, r: 40, g: 186, b: 40}
+        - color: {index: 3, r: 204, g: 210, b: 65}
+        - color: {index: 4, r: 255, g: 251, b: 255}
+        - color: {index: 5, r: 17, g: 49, b: 64}
+        - color: {index: 6, r: 190, g: 49, b: 64}
+        - color: {index: 7, r: 41, g: 41, b: 41}
+        - color: {index: 8, r: 105, g: 105, b: 110}
+        - color: {index: 9, r: 159, g: 159, b: 159}
+        - color: {index: 10, r: 255, g: 255, b: 255}
+    images: automatic
+converts:
+  - name: myimages
+    palette: full_palette
+    compress: zx0
+    images:
+      - snake/snake_Basic_Tileset.png
+      - snake/snake_Cool_Tileset.png
+      - snake/snake_Coral_Tileset.png
+      - snake/snake_Skeleton_Tileset.png
+      - snake/snake_Steel_Tileset.png
+      - snake/snake_Gold_Tileset.png
+      - snake/snake_Invalid_Tileset.png
+      - snake/snake_Donut_Tileset.png
+      - food/food_Apple.png
+      - food/food_Orange.png
+      - food/food_Mango.png
+      - food/food_Cherry.png
+      - food/golden_apple.png
+      - food/wings_1.png
+      - food/wings_2.png
+      - food/wings_3.png
+      - lock.png
+
+outputs:
+  - type: appvar
+    name: SNKSPR
+    include-file: snkspr.h
+    source-format: c
+    palettes:
+      - full_palette
+    converts:
+      - myimages

@@ -8,18 +8,8 @@
 #include "Snake.h"
 #include "Food.h"
 
-#include "gfx/gfx.h"
+#include "gfx/snkspr.h"
 #include "data/snippets.h"
-
-static gfx_sprite_t* const snake_skins[7] = {
-	snake_Basic_Tileset,
-	snake_Cool_Tileset,
-	snake_Coral_Tileset,
-	snake_Skeleton_Tileset,
-	snake_Steel_Tileset,
-    snake_Donut_Tileset,
-	snake_Gold_Tileset
-};
 
 #define style_strings_length 13
 
@@ -294,4 +284,8 @@ class Game
         uint8_t m_SOColor[3];
 
         uint8_t m_storeSnakeSelected = Snake::SnakeSkin::basic;
+
+        gfx_sprite_t* m_currentSnake;
+        gfx_sprite_t* m_currentFood;
+        gfx_sprite_t* m_goldenFood;
 };

@@ -16,6 +16,11 @@ class Food
             classic,
             winged
         };
+
+        enum class FoodSkin
+        {
+            apple
+        };
     public:
         Food();
         ~Food();
