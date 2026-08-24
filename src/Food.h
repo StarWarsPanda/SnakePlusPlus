@@ -30,7 +30,7 @@ class Food
         void Eat(Snake* snake = nullptr);
 
         void Update();
-        void Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood) const;
+        void Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood, uint24_t frame = 0);
 
         FoodType SetType(FoodType foodType);
 
@@ -39,12 +39,14 @@ class Food
     private:
         Vector2D<int24_t> m_position = Vector2D<int24_t>(0, 0);
         Vector2D<int24_t> m_previousPosition = Vector2D<int24_t>(0, 0);
+        Vector2D<int24_t> m_previousLerpPosition = Vector2D<int24_t>(0, 0);
 
         /* Direction in winged mode only; rotated by 45º clockwise */
         Direction         m_direction = Direction::Up;
 
         FoodType          m_foodType = FoodType::classic;
         bool              m_golden = false;
+        bool              m_isEaten = false;
 
-        //gfx_sprite_t* m_moveSprite;
+        gfx_sprite_t* m_moveSprite;
 };

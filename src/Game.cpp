@@ -5,6 +5,7 @@
 Game::Game()
 {
     srandom(rtc_Time());
+    random();
 
     if (SNKSPR_init() == 0)
     {
@@ -334,8 +335,8 @@ void Game::StageGame()
         free(scoreBackground);
     }
 
-    m_food.Draw(m_currentFood, m_goldenFood);
     m_snake.Draw(m_currentSnake, m_food.GetPosition(), !m_isFirst);
+    m_food.Draw(m_currentFood, m_goldenFood, m_frame);
 
     gfx_PrintStringXY(buffer, 10, 10);
 

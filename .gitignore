@@ -8,7 +8,6 @@
 /src/gfx/food
 /src/gfx/snake
 /src/fnt
-/src/data
 *.zip
 *.lst
 *.png

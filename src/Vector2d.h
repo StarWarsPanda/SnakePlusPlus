@@ -219,3 +219,8 @@ T Sign(T x)
 
     return (x > T(0)) ? T(1) : T(-1);
 }
+
+template <typename T>
+Vector2D<T> operator*(T scalar, const Vector2D<T>& v) {
+    return v * scalar;
+}
