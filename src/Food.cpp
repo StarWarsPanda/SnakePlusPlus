@@ -1,11 +1,23 @@
 ﻿#include "Food.h"
 #include "gfx/snkspr.h"
 
+#include <compression.h>
+
 Food::Food()
 {
-    m_moveSprite = gfx_MallocSprite(food_Apple_width, food_Apple_height);
+    m_moveSprite = gfx_MallocSprite(max(food_Apple_width, wings_1_width + 1), food_Apple_height + 1);
     gfx_GetSprite(m_moveSprite, 0, 0);
     Eat();
+}
+
+void Food::Setup()
+{
+    m_wings[0] = gfx_MallocSprite(wings_1_width, wings_1_height);
+    zx0_Decompress(m_wings[0], wings_1_compressed);
+    m_wings[1] = gfx_MallocSprite(wings_2_width, wings_2_height);
+    zx0_Decompress(m_wings[1], wings_2_compressed);
+    m_wings[2] = gfx_MallocSprite(wings_3_width, wings_3_height);
+    zx0_Decompress(m_wings[2], wings_3_compressed);
 }
 
 Food::~Food() {}
@@ -42,6 +54,8 @@ void Food::Eat(Snake* snake)
     m_direction = Direction(randInt(0, Direction::Size - 1));
 
     m_golden = randInt(0, 100) <= 15;
+
+    gfx_GetSprite(m_moveSprite, m_position.x, m_position.y);
 }
 
 void Food::Update()
@@ -97,7 +111,9 @@ void Food::Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood, uint24_t frame)
 
     if (m_foodType == FoodType::winged)
     {
-        gfx_Sprite(m_moveSprite, lerpPreviousPosition.x, lerpPreviousPosition.y);
+        gfx_Sprite(m_moveSprite, lerpPreviousPosition.x, lerpPreviousPosition.y - 1);
+        gfx_GetSprite(m_moveSprite, lerpPosition.x, lerpPosition.y - 1);
+        gfx_TransparentSprite(m_wings[(frame / 2) % 3], lerpPosition.x + 1, lerpPosition.y - 1);
     }
 
     if (m_golden)
@@ -109,7 +125,6 @@ void Food::Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood, uint24_t frame)
             gfx_ResetColor();
         }
 
-        gfx_GetSprite(m_moveSprite, lerpPosition.x, lerpPosition.y);
         gfx_TransparentSprite_NoClip(goldenFood, lerpPosition.x, lerpPosition.y);
 
         m_previousLerpPosition = lerpPosition;
@@ -124,10 +139,14 @@ void Food::Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood, uint24_t frame)
         gfx_ResetColor();
     }
 
-    gfx_GetSprite(m_moveSprite, lerpPosition.x, lerpPosition.y);
     gfx_TransparentSprite_NoClip(food, lerpPosition.x, lerpPosition.y);
 
     m_previousLerpPosition = lerpPosition;
+}
+
+Food::FoodType Food::GetType() const
+{
+    return m_foodType;
 }
 
 Food::FoodType Food::SetType(FoodType foodType)

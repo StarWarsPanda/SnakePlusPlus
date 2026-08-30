@@ -26,6 +26,8 @@
 
 #define gfx_CheckRectanglePoint(x0, y0, rx, ry, rw, rh) (((x0) >= (rx)) && ((x0) < ((rx) + (rw))) && ((y0) >= (ry)) && ((y0) < ((ry) + (rh))))
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
 #define map_range(x, imin, imax, omin, omax) (((x) - (imin)) * ((omax) - (omin)) / ((imax) - (imin)) + (omin))
 
 typedef enum 

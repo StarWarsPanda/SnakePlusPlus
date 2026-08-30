@@ -2,16 +2,21 @@
 
 A snake game using C++ for the TI-84 Plus CE
 
-![Snake++ Gameplay](game-animated.png)
-
 ## Game modes
 ### Classic
 Collect food for points, making sure to not hit walls or yourself as you grow
 
+![Snake++ Classic Gameplay](game-animated.png)
+
 ### Wrap
-Collect food for points, traversing from one side to another, and making sure to not yourself as you grow
+Collect food for points, traversing from one side to another, and making sure to not hit yourself as you grow
 
 ![Snake++ Wrap mode Gameplay](game-wrap-animated.png)
+
+### Winged
+Catch diagonally moving food and try not to bump into yourself in the hunt
+
+![Snake++ Wrap mode Gameplay](game-winged-animated.png)
 
 > Other gamemodes will come in later releases
 

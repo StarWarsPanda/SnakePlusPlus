@@ -372,6 +372,11 @@ uint24_t Snake::GetScore() const
     return m_snakeSize - m_defaultSnakeSize;
 }
 
+Snake::SnakeType Snake::GetType() const
+{
+    return m_snakeType;
+}
+
 Snake::SnakeType Snake::SetType(SnakeType type)
 {
     const Snake::SnakeType oldType = m_snakeType;

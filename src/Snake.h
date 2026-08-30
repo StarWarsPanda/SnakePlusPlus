@@ -61,6 +61,7 @@ class Snake
 
         uint24_t GetScore() const;
 
+        SnakeType GetType() const;
         SnakeType SetType(SnakeType type);
     public:
         uint24_t golden = 0;

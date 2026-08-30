@@ -25,6 +25,8 @@ class Food
         Food();
         ~Food();
 
+        void Setup();
+
         bool IsInsideFood(Vector2D<int24_t> position) const;
         bool IsGolden() const;
         void Eat(Snake* snake = nullptr);
@@ -32,6 +34,7 @@ class Food
         void Update();
         void Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood, uint24_t frame = 0);
 
+        FoodType GetType() const;
         FoodType SetType(FoodType foodType);
 
         const Vector2D<int24_t>& GetPosition() const;
@@ -49,4 +52,5 @@ class Food
         bool              m_isEaten = false;
 
         gfx_sprite_t* m_moveSprite;
+        gfx_sprite_t* m_wings[3];
 };

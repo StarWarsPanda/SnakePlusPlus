@@ -50,6 +50,12 @@ Game::Game()
     m_gui.navKeys.back  = { Key_2nd_Combine,   false, false, true };
     m_gui.navKeys.exit  = { Key_Clear_Combine, false, false, true };
 
+    m_highScores[0] = 0;
+    m_highScores[1] = 0;
+    m_highScores[2] = 0;
+    m_applesEaten = 0;
+    m_goldenApplesEaten = 0;
+
     Load();
 
     m_gui.SetFocusId(1);
@@ -59,6 +65,8 @@ Game::Game()
     m_currentSnake = gfx_MallocSprite(snake_Basic_Tileset_width, snake_Basic_Tileset_height);
     m_currentFood = gfx_MallocSprite(food_Apple_width, food_Apple_height);
     m_goldenFood = gfx_MallocSprite(food_Apple_width, food_Apple_height);
+
+    m_food.Setup();
 
     uint8_t* selectedSnakeSkin;
 
@@ -309,6 +317,15 @@ void Game::StageGame()
 
         if (m_food.IsInsideFood(m_snake.GetHeadPosition()))
         {
+            if (m_food.IsGolden())
+            {
+                ++m_goldenApplesEaten;
+            }
+            else
+            {
+                ++m_applesEaten;
+            }
+
             m_food.Eat(&m_snake);
             m_snake.AddLength();
         }
@@ -316,9 +333,19 @@ void Game::StageGame()
 
     const uint24_t score = m_snake.GetScore();
 
-    if (score > m_highScore)
+    if (m_snake.GetType() == Snake::SnakeType::classic && score > m_highScores[0])
     {
-        m_highScore = score;
+        m_highScores[0] = score;
+    }
+
+    if (m_snake.GetType() == Snake::SnakeType::wrap && score > m_highScores[1])
+    {
+        m_highScores[1] = score;
+    }
+
+    if (m_food.GetType() == Food::FoodType::winged && score > m_highScores[2])
+    {
+        m_highScores[2] = score;
     }
 
     char buffer[12];
@@ -498,9 +525,26 @@ void Game::StageStore()
 
 void Game::StageStats()
 {
-    gfx_PrintStringXY("Highscore: ", 5, 5);
-    gfx_SetTextXY(100, 5);
-    gfx_PrintInt(m_highScore, 1);
+    gfx_PrintStringXY("Highscores", 5, 5);
+    gfx_PrintStringXY("Classic: ", 5, 15);
+    gfx_SetTextXY(100, 15);
+    gfx_PrintInt(m_highScores[0], 1);
+    gfx_PrintStringXY("Wrap: ", 5, 25);
+    gfx_SetTextXY(100, 25);
+    gfx_PrintInt(m_highScores[1], 1);
+    gfx_PrintStringXY("Winged: ", 5, 35);
+    gfx_SetTextXY(100, 35);
+    gfx_PrintInt(m_highScores[2], 1);
+
+    gfx_TransparentSprite_NoClip(m_goldenFood, 5, 50);
+    gfx_PrintStringXY("Eaten: ", 20, 50);
+    gfx_SetTextXY(120, 50);
+    gfx_PrintInt(m_goldenApplesEaten, 1);
+
+    gfx_TransparentSprite_NoClip(m_currentFood, 5, 65);
+    gfx_PrintStringXY("Eaten: ", 20, 65);
+    gfx_SetTextXY(120, 65);
+    gfx_PrintInt(m_applesEaten, 1);
 
     if (m_gui.Button(20, 180, 80, 30, "BACK"))
     {
@@ -887,8 +931,12 @@ void Game::Load()
 
     m_gui.style = file.style;
     m_golden = file.goldenApples;
-    m_highScore = file.highScore;
+    m_highScores[0] = file.highScore;
+    m_highScores[1] = file.highScores[0];
+    m_highScores[2] = file.highScores[1];
     m_selectedSnake = file.selectedSnake;
+    m_applesEaten = file.applesEaten;
+    m_goldenApplesEaten = file.goldenApplesEaten;
     memcpy(m_collectables, file.unlockedSnakes, sizeof(SnakeSkinCollectable) * Snake::SnakeSkin::size);
 
     ti_Close(snksv);
@@ -901,8 +949,13 @@ void Game::Save()
     FileFormat file;
     file.style = m_gui.style;
     file.goldenApples = m_golden;
-    file.highScore = m_highScore;
+    file.highScore = m_highScores[0];
+    file.highScores[0] = m_highScores[1];
+    file.highScores[1] = m_highScores[2];
     file.selectedSnake = m_selectedSnake;
+    file.selectedSnake = m_selectedSnake;
+    file.applesEaten = m_applesEaten;
+    file.goldenApplesEaten = m_goldenApplesEaten;
     memcpy(file.unlockedSnakes, m_collectables, sizeof(SnakeSkinCollectable) * Snake::SnakeSkin::size);
     memcpy(file.palette, gfx_palette, sizeof(file.palette));;
     

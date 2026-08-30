@@ -188,10 +188,13 @@ class Game
     {
         GUI::Style style;
         uint24_t goldenApples;
-        uint24_t highScore;
+        uint24_t highScore; /* Classic high score */
         uint16_t palette[256];
         Snake::SnakeSkin selectedSnake;
         SnakeSkinCollectable unlockedSnakes[8];
+        uint24_t highScores[2]; /* Wrap high score, Winged high score */
+        uint24_t applesEaten;
+        uint24_t goldenApplesEaten;
     };
 
     public:
@@ -271,7 +274,9 @@ class Game
         uint24_t m_frame = 0;
         uint24_t m_golden = 0;
         uint24_t m_previousScore = 0;
-        uint24_t m_highScore = 0;
+        uint24_t m_highScores[3];
+        uint24_t m_applesEaten;
+        uint24_t m_goldenApplesEaten;
 
         Stage m_currentStage = Stage::main;
 
