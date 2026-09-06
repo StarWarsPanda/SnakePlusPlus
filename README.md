@@ -36,7 +36,10 @@ Allows for a fully-customizable themeing control with saving using an `AppVar`
 
 ### Stats
 
-> Coming in a later release (for things like high-score, food eaten, etc.)
+Shows stats from playing, like the best score in each mode, and how much food you have eaten
+
+![Snake++ Classic Gameplay](game-stats.png)
+
 ---
 Using the [TI-84 Plus CE Calculator Toolchain](https://github.com/CE-Programming/toolchain)
 

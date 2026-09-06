@@ -204,7 +204,7 @@ void Game::StageMain()
 
     m_gui.EndPanel();
 
-    gfx_PrintStringXY("v1.1.3",5,227);
+    gfx_PrintStringXY("v1.2.0",5,227);
 }
 
 void Game::StageGameSelect()

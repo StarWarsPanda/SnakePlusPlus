@@ -121,11 +121,11 @@ void Food::Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood, uint24_t frame)
         if (goldenFood == nullptr)
         {
             gfx_SetPaletteColor(78);
-            gfx_FillRectangle_NoClip(lerpPosition.x, lerpPosition.y, BLOCK_SIZE, BLOCK_SIZE);
+            gfx_FillRectangle(lerpPosition.x, lerpPosition.y, BLOCK_SIZE, BLOCK_SIZE);
             gfx_ResetColor();
         }
 
-        gfx_TransparentSprite_NoClip(goldenFood, lerpPosition.x, lerpPosition.y);
+        gfx_TransparentSprite(goldenFood, lerpPosition.x, lerpPosition.y);
 
         m_previousLerpPosition = lerpPosition;
 
@@ -135,11 +135,11 @@ void Food::Draw(gfx_sprite_t* food, gfx_sprite_t* goldenFood, uint24_t frame)
     if (food == nullptr)
     {
         gfx_SetPaletteColor(224);
-        gfx_FillRectangle_NoClip(lerpPosition.x, lerpPosition.y, BLOCK_SIZE, BLOCK_SIZE);
+        gfx_FillRectangle(lerpPosition.x, lerpPosition.y, BLOCK_SIZE, BLOCK_SIZE);
         gfx_ResetColor();
     }
 
-    gfx_TransparentSprite_NoClip(food, lerpPosition.x, lerpPosition.y);
+    gfx_TransparentSprite(food, lerpPosition.x, lerpPosition.y);
 
     m_previousLerpPosition = lerpPosition;
 }
